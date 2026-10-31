@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pazaak</title>
+<style>
+:root{--bg:#04060c;--bg2:#0b1424;--holo:#38bdf8;--gold:#fbbf24;--txt:#e2e8f0;--dim:#94a3b8;--red:#f87171;--grn:#4ade80;
+  --rC:#94a3b8;--rU:#4ade80;--rR:#60a5fa;--rL:#fbbf24}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Roboto,sans-serif;user-select:none;-webkit-user-select:none}
+body{background:radial-gradient(1px 1px at 12% 18%,#fff8,transparent),radial-gradient(1px 1px at 72% 34%,#fff6,transparent),radial-gradient(1.5px 1.5px at 40% 80%,#fff5,transparent),radial-gradient(1px 1px at 88% 72%,#fff7,transparent),radial-gradient(1px 1px at 25% 55%,#fff4,transparent),radial-gradient(ellipse at 50% 40%,var(--bg2),var(--bg));background-attachment:fixed}
+.screen{min-height:100svh}
+h1{margin:0;font-size:46px;letter-spacing:10px;color:var(--gold);text-shadow:0 0 18px #fbbf2466;font-weight:900}
+h2{margin:0;font-size:20px;letter-spacing:2px;text-transform:uppercase}
+h3{margin:14px 0 6px;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--holo)}
+input{font:inherit;width:100%;max-width:300px;padding:12px;border-radius:10px;border:1px solid #38bdf866;background:#0b1424;color:var(--txt);text-align:center;font-size:18px;user-select:text;-webkit-user-select:text}
+button{font:inherit;font-weight:700;background:var(--gold);color:#111;border:0;border-radius:8px;padding:10px 16px;font-size:16px;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+button.alt{background:#1e293b;color:var(--txt);border:1px solid #38bdf855}
+button.holo{background:transparent;color:var(--holo);border:1px solid var(--holo)}
+.btn-w{width:100%;max-width:300px}
+.dim{color:var(--dim);font-size:14px}
+.err{color:var(--red);min-height:20px;font-size:14px}
+.or{color:var(--dim);font-size:13px;margin:4px 0}
+.row2{display:flex;gap:8px;width:100%;max-width:300px}
+.row2>*{flex:1}
+
+/* menu */
+#menu,#lobby{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px 16px;text-align:center}
+.sub{color:var(--holo);letter-spacing:3px;font-size:12px;text-transform:uppercase;margin-top:-4px}
+.wallet{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px 0}
+.pill{background:#0f172a;border:1px solid #fbbf2455;border-radius:20px;padding:4px 12px;font-size:14px;font-weight:700}
+.pill.c{color:var(--gold)}
+.badge{display:inline-block;background:var(--red);color:#fff;border-radius:10px;font-size:12px;padding:0 7px;margin-left:6px}
+.box{background:#0b1424cc;border:1px solid #38bdf833;border-radius:14px;padding:12px;width:100%;max-width:340px;display:flex;flex-direction:column;gap:8px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#0004;border-radius:8px;padding:10px 12px}
+.code{font-size:34px;font-weight:800;letter-spacing:6px;color:var(--gold)}
+.ok{color:var(--grn);font-weight:700}
+
+/* cards */
+.pc{--w:56px;width:var(--w);height:calc(var(--w)*1.36);border-radius:calc(var(--w)*.14);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:calc(var(--w)*.34);color:#fff;border:2px solid #ffffff44;box-shadow:0 2px 6px #000a;text-shadow:0 1px 2px #000;flex:none;line-height:1}
+.pc::before{content:'';position:absolute;inset:calc(var(--w)*.07);border:1px solid #ffffff44;border-radius:calc(var(--w)*.08);pointer-events:none}
+.pc small{font-size:calc(var(--w)*.15);font-weight:700;opacity:.9;margin-top:2px;letter-spacing:.5px}
+.pc .cr{position:absolute;top:calc(var(--w)*.1);left:calc(var(--w)*.12);font-size:calc(var(--w)*.17)}
+.pc.main{background:linear-gradient(160deg,#4caf50,#1b5e20)}
+.pc.main.neg{background:linear-gradient(160deg,#4caf50,#7f1d1d)}
+.pc.plus{background:linear-gradient(160deg,#3b82f6,#1e3a8a)}
+.pc.minus{background:linear-gradient(160deg,#ef4444,#7f1d1d)}
+.pc.pm{background:linear-gradient(135deg,#2563eb 0 49%,#b91c1c 51% 100%)}
+.pc.gold{background:linear-gradient(160deg,#fde047,#a16207);color:#1c1300;text-shadow:none;border-color:#fff8}
+.pc.back{background:repeating-linear-gradient(45deg,#1f2937 0 4px,#334155 4px 8px);border-color:#64748b}
+.pc.back::before{border-color:#38bdf833}
+.pc.slot{background:#ffffff06;border:1px dashed #ffffff1c;box-shadow:none}
+.pc.slot::before{display:none}
+.pc.lock{filter:grayscale(1) brightness(.45)}
+.pc.tap{cursor:pointer;outline:3px solid var(--gold);outline-offset:1px;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{outline-color:#fbbf2433}}
+.pc.pop{animation:pop .45s ease-out}
+@keyframes pop{0%{transform:translateY(-30px) scale(.6);opacity:0}100%{transform:none;opacity:1}}
+.pc.flash{animation:flash .7s ease-out}
+@keyframes flash{0%{transform:rotateY(90deg)}100%{transform:none}}
+.rC{box-shadow:0 0 0 2px var(--rC),0 2px 6px #000a}.rU{box-shadow:0 0 0 2px var(--rU),0 0 10px #4ade8066}
+.rR{box-shadow:0 0 0 2px var(--rR),0 0 14px #60a5fa88}.rL{box-shadow:0 0 0 2px var(--rL),0 0 18px #fbbf24aa}
+
+/* table */
+#app{flex-direction:column;gap:6px;padding:max(env(safe-area-inset-top),8px) 10px max(env(safe-area-inset-bottom),8px);max-width:760px;margin:0 auto;--cw:min(14.5vw,6.9svh,62px)}
+#app:not([hidden]){display:flex}
+#top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#top button{padding:6px 10px;font-size:13px}
+#setNo{font-weight:800;letter-spacing:2px;color:var(--holo);font-size:14px;text-transform:uppercase}
+.sideW{display:flex;gap:10px;align-items:stretch;background:#0b1424aa;border:1px solid #38bdf822;border-radius:14px;padding:8px}
+.sideW.on{border-color:var(--gold);box-shadow:0 0 14px #fbbf2433}
+.info{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:0;text-align:center}
+.nm{font-weight:800;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.tot{font-size:38px;font-weight:900;line-height:1;background:#000a;border:2px solid #38bdf855;border-radius:10px;min-width:72px;padding:6px 8px}
+.tot.bust{color:var(--red);border-color:var(--red)}.tot.tw{color:var(--gold);border-color:var(--gold)}
+.lights{display:flex;gap:6px}.lights i{width:14px;height:14px;border-radius:50%;border:2px solid #fbbf2488;display:block}
+.lights i.f{background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.st{font-size:11px;font-weight:800;letter-spacing:2px;min-height:14px;color:var(--holo)}
+.st.stand{color:var(--gold)}
+.ohand{display:flex;gap:3px}.ohand .pc{--w:18px;border-width:1px}.ohand .pc::before{display:none}
+.board{display:grid;grid-template-columns:repeat(3,var(--cw));gap:5px}
+.board .pc{--w:var(--cw)}
+#msg{min-height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:14px}
+#msg .inst{font-size:12px;color:var(--dim)}
+#handRow{display:flex;justify-content:center;gap:8px}
+#hand{display:flex;gap:8px}
+#hand .pc{--w:calc(var(--cw)*1.08)}
+#btns{display:flex;gap:8px;justify-content:center}
+#btns button{flex:1;max-width:170px;padding:12px}
+#bStand{background:var(--holo)}
+@media (min-width:700px) and (min-height:600px){#app{--cw:min(8vw,6.8svh,64px)}}
+
+/* overlays */
+#ov,#pick{display:none;position:fixed;inset:0;background:#000c;align-items:center;justify-content:center;padding:20px;z-index:50}
+.panel{background:#0f172a;border:1px solid var(--holo);border-radius:16px;padding:20px;width:100%;max-width:360px;text-align:center;box-shadow:0 0 40px #38bdf833}
+.panel h2{margin-bottom:8px}
+.panel button{width:100%;margin-top:8px;padding:12px}
+.big{font-size:22px;font-weight:800;margin:6px 0;color:var(--gold)}
+.rw{background:#000a;border-radius:10px;padding:10px;margin:10px 0;font-size:14px;line-height:1.5}
+.pickopts{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+
+.layer{position:fixed;inset:0;z-index:30;overflow-y:auto;background:radial-gradient(ellipse at 50% 30%,#0b1424,#04060c);padding:max(env(safe-area-inset-top),12px) 16px 40px}
+.lw{max-width:640px;margin:0 auto}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.hd button{padding:8px 14px}
+.grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.gc{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--dim);cursor:pointer;width:64px;text-align:center}
+.gc .pc{--w:54px}
+.gc b{color:var(--txt)}
+.slots{display:grid;grid-template-columns:repeat(5,auto);gap:8px;justify-content:center;background:#0005;border:1px solid #38bdf833;border-radius:12px;padding:10px}
+.slots .pc{--w:min(15vw,54px);cursor:pointer}
+.legend{font-size:13px;color:var(--dim);line-height:1.6}
+.legend b{color:var(--txt)}
+#cardInfo{min-height:38px;text-align:center;font-size:13px;margin:8px 0;color:var(--txt)}
+.bot{display:flex;gap:12px;align-items:center;background:#0b1424;border:1px solid #38bdf833;border-radius:14px;padding:12px;margin-bottom:10px;cursor:pointer}
+.bot:hover{border-color:var(--holo)}
+.av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;flex:none;border:2px solid #fff3}
+.bot .t{flex:1}.bot .t b{font-size:16px}.bot .t div{font-size:12px;color:var(--dim)}
+.diff{font-size:11px;font-weight:800;letter-spacing:1px;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:3px}
+.mini{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}.mini .pc{--w:30px;font-size:11px}.mini .pc small{display:none}
+.packs{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.pack{width:140px;background:#0b1424;border:1px solid #38bdf844;border-radius:14px;padding:12px;text-align:center}
+.pack .art{height:110px;border-radius:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;letter-spacing:2px}
+.pack.std .art{background:linear-gradient(160deg,#1e3a8a,#0f172a);border:2px solid #60a5fa}
+.pack.prem .art{background:linear-gradient(160deg,#a16207,#1c1300);border:2px solid #fbbf24;color:var(--gold)}
+.pack button{width:100%;padding:8px}
+#reveal{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;min-height:120px;margin:14px 0}
+.rv{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;width:72px;text-align:center}
+.rv .pc{--w:64px;cursor:pointer}
+.rv .new{color:var(--grn);font-weight:800}.rv .dup{color:var(--gold);font-weight:800}
+.flipIn{animation:flash .5s ease-out}
+/* shop */
+.hutt{display:flex;gap:12px;align-items:flex-end;margin:6px 0 14px}
+.hutt svg{width:130px;flex:none}
+.speech{position:relative;background:#f5f0dc;color:#2a2410;border-radius:14px;padding:12px;font-size:14px;font-style:italic;flex:1;margin-bottom:30px}
+.speech::after{content:'';position:absolute;left:-10px;bottom:14px;border:10px solid transparent;border-right-color:#f5f0dc;border-left:0}
+.item{display:flex;gap:12px;align-items:center;background:#0b1424;border:1px solid #38bdf833;border-radius:12px;padding:10px;margin-bottom:8px}
+.item .pc{--w:48px}
+.item .t{flex:1;font-size:13px;color:var(--dim)}.item .t b{color:var(--txt);font-size:15px}
+.item button{padding:8px 12px;font-size:14px;white-space:nowrap}
+.item.deal{border-color:var(--gold);box-shadow:0 0 12px #fbbf2433}
+.tag{display:inline-block;margin-top:2px;font-size:10px;font-weight:800;letter-spacing:1px;padding:1px 6px;border-radius:8px;margin-left:4px;vertical-align:middle}
+
+/* invite sheets */
+.inv-back{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+.inv-back.show{display:flex}
+.inv-link{word-break:break-all;background:#000a;padding:10px;border-radius:8px;font-size:14px;margin:10px 0;user-select:text;-webkit-user-select:text}
+.inv-row{display:flex;gap:8px;margin-top:10px}.inv-row button{flex:1}
+.inv-msg{font-size:14px;color:var(--red);min-height:18px;margin-top:8px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:20px;z-index:100;opacity:0;transition:opacity .3s;pointer-events:none;font-size:14px}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ============ MAIN MENU ============ -->
+<div id="menu" class="screen">
+  <h1>PAZAAK</h1>
+  <div class="sub">Outer Rim Cantina Rules</div>
+  <div class="wallet"><span class="pill c" id="mCr"></span><span class="pill" id="mColl"></span></div>
+  <input id="name" placeholder="Your name" maxlength="12">
+  <button id="bPlayBots" class="btn-w">Play the Cantina (vs bots)</button>
+  <div class="row2"><button id="bDeck" class="alt">Side Deck</button><button id="bPacks" class="alt">Packs</button></div>
+  <button id="bShop" class="btn-w alt">🐌 Grelko's Den (shop)</button>
+  <div class="or">— play a friend —</div>
+  <button id="create" class="btn-w holo" disabled>Create online game</button>
+  <div class="row2"><input id="code" placeholder="CODE" maxlength="4" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:4px"><button id="join" class="holo" disabled style="flex:.6">Join</button></div>
+  <div id="err" class="err"></div>
+  <div id="conn" class="dim">Connecting to the HoloNet…</div>
+  <button id="bRules" class="alt" style="font-size:13px;padding:6px 12px">How to play</button>
+</div>
+
+<!-- ============ ONLINE LOBBY ============ -->
+<div id="lobby" class="screen" hidden>
+  <div class="dim">Room code</div>
+  <div class="code" id="rc"></div>
+  <div class="box" id="seats"></div>
+  <div class="box">
+    <div class="dim">Your side deck (pick before you play)</div>
+    <div class="mini" id="lobDeck"></div>
+    <div class="row2" style="max-width:none"><button id="lobEdit" class="alt">Choose cards</button><button id="lobReady">Ready</button></div>
+  </div>
+  <button id="invite" class="btn-w holo">Invite a player</button>
+  <button id="start" class="btn-w" hidden>Start match</button>
+  <div id="lmsg" class="dim"></div>
+  <button id="lobLeave" class="alt" style="font-size:13px;padding:6px 12px">Leave</button>
+</div>
+
+<!-- ============ GAME TABLE ============ -->
+<div id="app" class="screen" hidden>
+  <div id="top"><button id="bQuit" class="alt">☰ Menu</button><div id="setNo"></div><div class="dim" style="font-size:12px">First to 3 sets</div></div>
+  <div class="sideW" id="opW">
+    <div class="info"><div class="nm" id="opNm"></div><div class="tot" id="opTot"></div><div class="lights" id="opL"></div><div class="ohand" id="opHand"></div><div class="st" id="opSt"></div></div>
+    <div class="board" id="opB"></div>
+  </div>
+  <div id="msg"></div>
+  <div class="sideW" id="meW">
+    <div class="info"><div class="nm" id="meNm"></div><div class="tot" id="meTot"></div><div class="lights" id="meL"></div><div class="st" id="meSt"></div></div>
+    <div class="board" id="meB"></div>
+  </div>
+  <div id="handRow"><div id="hand"></div></div>
+  <div id="btns"><button id="bEnd">End Turn</button><button id="bStand">Stand</button></div>
+</div>
+
+<div id="ov"></div>
+<div id="pick"></div>
+
+<!-- ============ LAYERS ============ -->
+<div id="botsL" class="layer" hidden><div class="lw">
+  <div class="hd"><h2>The Cantina</h2><button class="alt" data-close>Back</button></div>
+  <div class="dim" style="margin-bottom:10px">Pick an opponent. Win to earn card packs and credits. Even a loss earns a few credits for your trouble.</div>
+  <div class="box" style="max-width:none;margin-bottom:12px"><div class="dim">Your side deck</div><div class="mini" id="botDeck"></div><button class="alt" id="botEdit">Edit side deck</button></div>
+  <div id="botList"></div>
+</div></div>
+
+<div id="deckL" class="layer" hidden><div class="lw">
+  <div class="hd"><h2>Side Deck <span id="dCount" class="dim"></span></h2><button id="deckDone">Done</button></div>
+  <div class="dim" style="margin-bottom:8px">Choose 10 cards. Each match, 4 of them are dealt at random into your hand, and they have to last the whole match. Tap a card below to add it, tap a deck slot to remove it.</div>
+  <div class="slots" id="dSlots"></div>
+  <div class="row2" style="max-width:none;margin-top:8px"><button class="alt" id="dAuto">Auto-fill best</button><button class="alt" id="dClear">Clear</button></div>
+  <div id="cardInfo"></div>
+  <h3>Your collection</h3>
+  <div class="grid" id="dColl"></div>
+  <h3>Card types</h3>
+  <div class="legend">
+    <b style="color:#4caf50">Green</b> main deck cards (1–10) are dealt to you each turn.<br>
+    <b style="color:#60a5fa">Blue +</b> cards add · <b style="color:#f87171">Red −</b> cards subtract · <b>Red/blue ±</b> cards let you choose the sign.<br>
+    <b style="color:var(--gold)">Gold</b> cards are special: Flip 2&amp;4, Flip 3&amp;6, Double, Tiebreaker.<br>
+    Rarity rings: <b style="color:var(--rC)">Common</b> · <b style="color:var(--rU)">Uncommon</b> · <b style="color:var(--rR)">Rare</b> · <b style="color:var(--rL)">Legendary</b>. You can own up to 3 of each card.
+  </div>
+</div></div>
+
+<div id="packsL" class="layer" hidden><div class="lw">
+  <div class="hd"><h2>Card Packs</h2><button class="alt" data-close>Back</button></div>
+  <div class="wallet"><span class="pill c" id="pCr"></span></div>
+  <div class="packs">
+    <div class="pack std"><div class="art">PZK</div><b>Cantina Pack</b><div class="dim" id="nStd"></div><button id="openStd">Open</button></div>
+    <div class="pack prem"><div class="art">★</div><b>Smuggler's Pack</b><div class="dim" id="nPrem"></div><button id="openPrem">Open</button></div>
+  </div>
+  <div class="dim" style="text-align:center">5 cards per pack. Smuggler's Packs always hold a Rare or better. Cards you already own 3 of are sold to Grelko for credits.</div>
+  <div id="reveal"></div>
+  <div style="text-align:center" id="revBtns"></div>
+</div></div>
+
+<div id="shopL" class="layer" hidden><div class="lw">
+  <div class="hd"><h2>Grelko's Den</h2><button class="alt" data-close>Back</button></div>
+  <div class="hutt">
+    <svg viewBox="0 0 140 130" aria-hidden="true">
+      <ellipse cx="70" cy="100" rx="62" ry="28" fill="#6b6b2e"/>
+      <path d="M120 105 q22 -4 14 -24 q-6 10 -18 10z" fill="#5c5c26"/>
+      <ellipse cx="66" cy="78" rx="48" ry="40" fill="#7d7a36"/>
+      <ellipse cx="66" cy="92" rx="34" ry="22" fill="#a39a5a" opacity=".55"/>
+      <ellipse cx="62" cy="44" rx="40" ry="30" fill="#858140"/>
+      <ellipse cx="44" cy="38" rx="9" ry="7" fill="#f59e0b"/><ellipse cx="80" cy="38" rx="9" ry="7" fill="#f59e0b"/>
+      <rect x="38" y="36.5" width="12" height="3" rx="1.5" fill="#1a1405"/><rect x="74" y="36.5" width="12" height="3" rx="1.5" fill="#1a1405"/>
+      <path d="M32 56 q30 18 62 0" stroke="#3b2f10" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M58 48 l3 3 l3 -3" stroke="#3b2f10" stroke-width="2" fill="none"/>
+      <path d="M22 80 q-14 6 -8 18" stroke="#6b6b2e" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <path d="M110 80 q12 4 8 16" stroke="#6b6b2e" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <circle cx="12" cy="99" r="4" fill="#fbbf24"/><circle cx="20" cy="104" r="3" fill="#fbbf24"/>
+    </svg>
+    <div class="speech" id="huttSay"></div>
+  </div>
+  <div class="wallet"><span class="pill c" id="sCr"></span></div>
+  <div id="shopList"></div>
+</div></div>
+
+<div id="rulesL" class="layer" hidden><div class="lw">
+  <div class="hd"><h2>How to play</h2><button class="alt" data-close>Back</button></div>
+  <div class="legend" style="font-size:15px;line-height:1.7">
+    <p><b>Goal:</b> get closer to 20 than your opponent without going over. Win <b>3 sets</b> to win the match.</p>
+    <p><b>Your turn:</b> you're dealt a green card (1–10) from the main deck. Then you may play <b>one</b> card from your hand. Finish with <b>End Turn</b> (you'll get another card next turn) or <b>Stand</b> (lock in your total).</p>
+    <p><b>Bust:</b> if you end your turn over 20, you lose the set.</p>
+    <p><b>Exactly 20</b> makes you stand automatically. <b>Fill all 9 slots</b> without busting and you win the set right away.</p>
+    <p>When both players stand, the closer total wins. Tied sets don't count, unless someone played a <b>Tiebreaker</b>. The loser of a set goes first in the next one.</p>
+    <p><b>Side deck:</b> before each match you choose 10 cards. 4 are dealt at random into your hand and must last the <b>whole match</b>. Once you play a card, it's gone.</p>
+    <p><b>Collecting:</b> you start with basic + and − cards. Beat bots or other players to earn packs. Duplicates past 3 turn into credits, which you can spend at Grelko's Den on powerful cards.</p>
+  </div>
+</div></div>
+
+<!-- invite sheets (host / guest) -->
+<div class="inv-back" id="invHostBack"><div class="panel">
+  <h2>Invite a player</h2>
+  <p class="dim">Send this link to a friend. They type their name, choose their side deck and you're on.</p>
+  <div class="inv-link" id="invLink"></div>
+  <div class="inv-row"><button id="invCopy">Copy link</button><button id="invText">Text it</button></div>
+  <div class="inv-row"><button class="alt" id="invClose">Close</button></div>
+</div></div>
+<div class="inv-back" id="invJoinBack"><div class="panel">
+  <h2>Join game <span id="invJoinCode"></span></h2>
+  <p class="dim">Type your name to take a seat.</p>
+  <input id="invName" maxlength="12" placeholder="Your name" autocomplete="off">
+  <div class="inv-msg" id="invMsg"></div>
+  <div class="inv-row"><button class="alt" id="invCancel">Cancel</button><button id="invGo" disabled>Join</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* ===================================================================
+   Firebase: same project and room layout as the Golf game.
+   rooms/CODE/{host, seats/i, state, private/uid, act/uid}
+   =================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyD6XYGPqYrIVpaNGbU9v2VwByVjyCpHdXk",
+  authDomain: "golf-2a8eb.firebaseapp.com",
+  databaseURL: "https://golf-2a8eb-default-rtdb.firebaseio.com",
+  projectId: "golf-2a8eb",
+  storageBucket: "golf-2a8eb.firebasestorage.app",
+  messagingSenderId: "900615888538",
+  appId: "1:900615888538:web:555d88dec6f1df27ba4923"
+};
+let db=null,auth=null;
+try{firebase.initializeApp(firebaseConfig);db=firebase.database();auth=firebase.auth()}catch(e){console.warn('Online play unavailable',e)}
+
+/* ---------- helpers ---------- */
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const newId=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const T={think:900,beat:750,setstart:1300,setover:2900};
+const sgn=v=>(v>0?'+':v<0?'−':'')+Math.abs(v);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2000)}
+
+/* ===================================================================
+   CARDS
+   =================================================================== */
+const CAT={};
+for(let n=1;n<=6;n++){
+  CAT['P'+n]={t:'p',n,r:'C',name:'+'+n,desc:`Adds ${n} to your total.`};
+  CAT['M'+n]={t:'m',n,r:'C',name:'−'+n,desc:`Subtracts ${n} from your total.`};
+  CAT['X'+n]={t:'x',n,r:n<=4?'U':'R',name:'±'+n,desc:`Play it as +${n} or −${n}, your choice.`};
+}
+CAT.Y  ={t:'y',r:'R',name:'±1/2',desc:'Play it as +1, +2, −1 or −2.'};
+CAT.F24={t:'f',a:[2,4],r:'L',name:'Flip 2&4',desc:'Flips the sign of every 2 and 4 on your side of the table.'};
+CAT.F36={t:'f',a:[3,6],r:'L',name:'Flip 3&6',desc:'Flips the sign of every 3 and 6 on your side of the table.'};
+CAT.D  ={t:'d',r:'L',name:'Double',desc:'Doubles the value of the last card on your table.'};
+CAT.T  ={t:'t',r:'L',name:'Tiebreaker',desc:'Play it as +1 or −1. If the set ends in a tie, you win it.'};
+const IDS=Object.keys(CAT).sort((a,b)=>ORD(a)-ORD(b));
+function ORD(id){const k=CAT[id];return {p:0,m:1,x:2,y:3,t:4,f:5,d:6}[k.t]*10+(k.n||0)+(id==='F36'?1:0)}
+const RNAME={C:'Common',U:'Uncommon',R:'Rare',L:'Legendary'};
+const RCOL={C:'var(--rC)',U:'var(--rU)',R:'var(--rR)',L:'var(--rL)'};
+const RRANK={C:0,U:1,R:2,L:3};
+const DUPE={C:10,U:25,R:60,L:150};       // credits for a card you already own 3 of
+const PRICE={U:150,R:350,L:900};         // Grelko's prices
+
+function choices(id){const k=CAT[id];
+  switch(k.t){case'p':return[k.n];case'm':return[-k.n];case'x':return[k.n,-k.n];case'y':return[1,2,-1,-2];case't':return[1,-1];default:return[0]}}
+function applyPlay(b,id,v){
+  const k=CAT[id];
+  if(k.t==='f'){b.forEach(e=>{if(k.a.includes(Math.abs(e.v)))e.v=-e.v});b.push({c:id,v:0})}
+  else if(k.t==='d'){const l=b[b.length-1];b.push({c:id,v:l?l.v:0})}
+  else b.push({c:id,v});
+}
+const total=b=>b.reduce((s,e)=>s+e.v,0);
+const encB=b=>b.length?b.map(e=>e.c+':'+e.v).join(','):'_';
+const decB=s=>!s||s==='_'?[]:s.split(',').map(t=>{const[c,v]=t.split(':');return{c,v:+v}});
+const encL=a=>a&&a.length?a.join(','):'_';
+const decL=s=>!s||s==='_'?[]:s.split(',');
+const mainDeck=()=>{const d=[];for(let n=1;n<=10;n++)for(let k=0;k<4;k++)d.push(n);return shuf(d)};
+
+function cardFace(id){const k=CAT[id];
+  switch(k.t){
+    case'p':return{cls:'plus',big:'+'+k.n};case'm':return{cls:'minus',big:'−'+k.n};
+    case'x':return{cls:'pm',big:'±'+k.n};case'y':return{cls:'pm',big:'±1',sm:'or 2'};
+    case't':return{cls:'gold',big:'±1',sm:'TIE'};case'f':return{cls:'gold',big:k.a.join('&'),sm:'FLIP'};
+    case'd':return{cls:'gold',big:'D',sm:'DOUBLE'};}}
+// a card from a hand / collection
+function cardHTML(id,cls='',attrs=''){
+  if(!id)return `<div class="pc slot ${cls}" ${attrs}></div>`;
+  const f=cardFace(id);
+  return `<div class="pc ${f.cls} ${cls}" ${attrs} title="${esc(CAT[id].name+': '+CAT[id].desc)}">${f.big}${f.sm?`<small>${f.sm}</small>`:''}</div>`;
+}
+const backHTML=(cls='')=>`<div class="pc back ${cls}"></div>`;
+// a card on the table
+function boardHTML(e,cls=''){
+  if(e.c[0]==='N'){const n=+e.c.slice(1);return `<div class="pc main ${e.v<0?'neg':''} ${cls}">${e.v}${e.v!==n?'<small>FLIPPED</small>':''}</div>`}
+  const k=CAT[e.c];
+  if(k.t==='f')return `<div class="pc gold ${cls}">${k.a.join('&')}<small>FLIP</small></div>`;
+  if(k.t==='d')return `<div class="pc gold ${cls}">${sgn(e.v)}<small>DOUBLE</small></div>`;
+  if(k.t==='t')return `<div class="pc gold ${cls}">${sgn(e.v)}<small>TIE</small></div>`;
+  const pmMark=(k.t==='x'||k.t==='y')?'<span class="cr">±</span>':'';
+  return `<div class="pc ${e.v>=0?'plus':'minus'} ${cls}">${pmMark}${sgn(e.v)}</div>`;
+}
+
+/* ===================================================================
+   PLAYER PROFILE (saved on this device)
+   =================================================================== */
+const STARTER=['P1','P2','P3','P4','P5','P6','M1','M2','M3','M4','M5','M6'];
+let PR=null;
+function loadProfile(){
+  try{PR=JSON.parse(localStorage.getItem('pazaakProfile'))}catch(e){PR=null}
+  if(!PR||!PR.coll){
+    PR={credits:50,coll:{},deck:['P1','P2','P3','P4','P5','M1','M2','M3','M4','M5'],packs:{std:1,prem:0},claimed:[],w:0,l:0};
+    STARTER.forEach(id=>PR.coll[id]=1);
+  }
+  PR.packs=PR.packs||{std:0,prem:0};PR.claimed=PR.claimed||[];
+  PR.deck=(PR.deck||[]).filter(id=>CAT[id]);
+  fixDeck();
+}
+function saveProfile(){try{localStorage.setItem('pazaakProfile',JSON.stringify(PR))}catch(e){}}
+const owned=id=>PR.coll[id]||0;
+// remove cards from the deck that the collection can't cover
+function fixDeck(){const used={};PR.deck=PR.deck.filter(id=>{used[id]=(used[id]||0)+1;return used[id]<=owned(id)})}
+const collSize=()=>Object.values(PR.coll).reduce((a,b)=>a+b,0);
+function refreshWallet(){
+  const np=PR.packs.std+PR.packs.prem;
+  $('mCr').textContent=`◈ ${PR.credits} credits`;
+  $('mColl').textContent=`${collSize()} / ${IDS.length*3} cards`;
+  $('bPacks').innerHTML='Packs'+(np?`<span class="badge">${np}</span>`:'');
+  $('pCr').textContent=$('sCr').textContent=`◈ ${PR.credits} credits`;
+}
+// Adds one card to the collection. Returns {id,isNew,cr}
+function grantCard(id){
+  const r=CAT[id].r;
+  if(owned(id)>=3){PR.credits+=DUPE[r];return{id,cr:DUPE[r]}}
+  const isNew=!owned(id);PR.coll[id]=owned(id)+1;return{id,isNew};
+}
+
+/* ---------- packs ---------- */
+const WEIGHTS={std:{C:66,U:25,R:8,L:1},prem:{C:40,U:34,R:20,L:6}};
+function roll(w){let x=Math.random()*Object.values(w).reduce((a,b)=>a+b,0);for(const k in w){x-=w[k];if(x<0)return k}return'C'}
+const pickOf=r=>{const l=IDS.filter(id=>CAT[id].r===r);return l[Math.random()*l.length|0]};
+function rollPack(kind){
+  const out=[];
+  for(let i=0;i<4;i++)out.push(pickOf(roll(WEIGHTS[kind])));
+  // last card is guaranteed: Uncommon+ in a Cantina Pack, Rare+ in a Smuggler's Pack
+  out.push(pickOf(kind==='prem'?roll({R:78,L:22}):roll({U:74,R:22,L:4})));
+  return out;
+}
+
+/* ===================================================================
+   OPPONENTS
+   =================================================================== */
+const BOTS=[
+  {id:'teff',name:'Teff',title:'Moisture farmer. Plays for fun, mostly loses.',lvl:0,av:'🧑‍🌾',col:'#365314',
+   deck:['P1','P2','P3','P4','P5','M1','M2','M3','M4','M5'],rw:{std:1,cr:20}},
+  {id:'grik',name:'Grik',title:'Rodian smuggler. Knows when to hold.',lvl:1,av:'👽',col:'#14532d',
+   deck:['P2','P3','P4','M2','M3','M4','M5','X1','X2','X3'],rw:{std:1,cr:40}},
+  {id:'lyra',name:'Lyra Venn',title:"Twi'lek card shark. Never wastes a card.",lvl:2,av:'💃',col:'#1e3a8a',
+   deck:['X1','X2','X3','X4','X5','M3','M4','M5','M6','P4'],rw:{prem:1,cr:75}},
+  {id:'kast',name:'Kast Orrin',title:'Mandalorian champion. Brings gold to the table.',lvl:3,av:'🪖',col:'#7c2d12',
+   deck:['X2','X3','X4','X5','X6','Y','T','D','F24','M6'],rw:{prem:2,cr:150}},
+];
+const DIFF=[['EASY','#365314'],['NORMAL','#1d4ed8'],['HARD','#9333ea'],['CHAMPION','#b45309']];
+const HUMAN_WIN={prem:1,cr:100},HUMAN_LOSS={cr:15},BOT_LOSS={cr:10};
+
+/* ===================================================================
+   MATCH ENGINE
+   Runs on the host's phone (online) or this phone (vs bots).
+   io.publish(state, privates) pushes state; io.wait(i, ok) waits for a human move.
+   =================================================================== */
+class Match{
+  constructor(players,io){
+    this.P=players;this.io=io;this.seq=0;this.mid=newId();this.dead=false;
+    this.sets=[0,0];this.set=0;this.winner=-1;this.result='';this.sw=-1;
+    this.boards=[[],[]];this.stood=[false,false];this.tb=[false,false];this.played=false;this.turn=0;
+    this.hands=players.map(p=>shuf(p.deck.slice()).slice(0,4));
+  }
+  name(i){return this.P[i].name}
+  async pub(){
+    if(this.dead)throw new Error('aborted');
+    this.seq++;
+    const s={status:'playing',game:'pazaak',mid:this.mid,seq:this.seq,set:this.set,sets:this.sets,turn:this.turn,phase:this.phase,
+      msg:this.msg||'',players:this.P.map(p=>({name:p.name,human:!!p.human})),bot:(this.P.find(p=>p.bot)||{bot:{id:''}}).bot.id,
+      boards:this.boards.map(encB),totals:this.boards.map(total),stood:this.stood,tb:this.tb,hc:this.hands.map(h=>h.length),
+      played:this.played,winner:this.winner,result:this.result||'',sw:this.sw};
+    const priv=[];this.P.forEach((p,i)=>{if(p.human)priv.push({i,uid:p.uid,hand:encL(this.hands[i])})});
+    await this.io.publish(s,priv);
+  }
+  async run(){
+    let first=Math.random()<.5?0:1;
+    while(this.sets[0]<3&&this.sets[1]<3){
+      this.set++;
+      const w=await this.playSet(first);
+      if(w>=0){this.sets[w]++;first=1-w}
+      this.phase='setover';await this.pub();await sleep(T.setover);
+    }
+    this.winner=this.sets[0]>=3?0:1;
+    this.phase='over';this.msg=this.name(this.winner)+' wins the match!';
+    await this.pub();
+  }
+  async playSet(first){
+    this.main=mainDeck();this.boards=[[],[]];this.stood=[false,false];this.tb=[false,false];
+    this.turn=first;this.played=false;this.result='';this.sw=-1;
+    this.phase='start';this.msg=`Set ${this.set}: ${this.name(first)} goes first.`;
+    await this.pub();await sleep(T.setstart);
+    while(true){
+      const p=this.turn,o=1-p,r=await this.takeTurn(p);
+      if(r==='bust')return this.endSet(o,`${this.name(p)} busts with ${total(this.boards[p])}!`);
+      if(r==='nine')return this.endSet(p,`${this.name(p)} fills the table with 9 cards!`);
+      if(this.stood[0]&&this.stood[1]){
+        const a=total(this.boards[0]),b=total(this.boards[1]);
+        if(a!==b)return this.endSet(a>b?0:1,`${this.name(a>b?0:1)} wins the set, ${Math.max(a,b)} to ${Math.min(a,b)}.`);
+        if(this.tb[0]!==this.tb[1]){const w=this.tb[0]?0:1;return this.endSet(w,`Tied at ${a}, but ${this.name(w)}'s Tiebreaker takes the set!`)}
+        return this.endSet(-1,`Tied at ${a}. The set doesn't count.`);
+      }
+      this.turn=!this.stood[o]?o:p;
+    }
+  }
+  endSet(w,txt){this.sw=w;this.result=txt;this.msg=txt;return w}
+  async takeTurn(p){
+    const b=this.boards[p],nm=this.name(p);
+    const c=this.main.pop();b.push({c:'N'+c,v:c});this.played=false;this.turn=p;
+    this.msg=`${nm} draws a ${c}.`;
+    const check=()=>{const t=total(b);if(b.length>=9&&t<=20)return'nine';if(t===20){this.stood[p]=true;this.msg+=` ${nm} hits 20 and stands.`;return'stand'}return null};
+    let r=check();
+    if(r||(b.length>=9)){this.phase='beat';await this.pub();await sleep(T.beat*1.4);return r||'bust'}
+    while(true){
+      this.phase=this.P[p].human?'act':'ai';await this.pub();
+      const a=this.P[p].human?await this.io.wait(p,x=>this.valid(p,x)):await this.aiMove(p);
+      if(a.type==='play'){
+        const id=this.hands[p][a.i];this.hands[p].splice(a.i,1);
+        applyPlay(b,id,a.v);if(CAT[id].t==='t')this.tb[p]=true;this.played=true;
+        const k=CAT[id];
+        this.msg=`${nm} plays ${k.t==='f'||k.t==='d'?k.name:sgn(b[b.length-1].v)+(k.t==='t'?' (Tiebreaker)':'')}. Total ${total(b)}.`;
+        r=check();if(r){this.phase='beat';await this.pub();await sleep(T.beat*1.4);return r}
+        if(!this.P[p].human){this.phase='ai';await this.pub();await sleep(T.beat)}
+        continue;
+      }
+      if(total(b)>20)return'bust';
+      if(a.type==='stand'){this.stood[p]=true;this.msg=`${nm} stands on ${total(b)}.`;await this.pub();await sleep(T.beat);return'stand'}
+      this.msg=`${nm} ends the turn on ${total(b)}.`;return'end';
+    }
+  }
+  valid(p,a){
+    if(!a||this.turn!==p)return false;
+    if(a.type==='end'||a.type==='stand')return true;
+    if(a.type!=='play'||this.played||this.boards[p].length>=9)return false;
+    const id=this.hands[p][a.i];if(!id)return false;
+    const ch=choices(id);if(ch.length===1)a.v=ch[0];
+    return ch.includes(a.v);
+  }
+  /* ---------- computer opponent ---------- */
+  async aiMove(p){
+    await sleep(T.think);
+    const lvl=this.P[p].bot.lvl,o=1-p,b=this.boards[p],t=total(b),ot=total(this.boards[o]),oS=this.stood[o];
+    const opts=[];
+    if(!this.played&&b.length<9)this.hands[p].forEach((id,i)=>choices(id).forEach(v=>{
+      const nb=b.map(e=>({...e}));applyPlay(nb,id,v);opts.push({i,v,r:total(nb),cost:RRANK[CAT[id].r]+(CAT[id].t==='t'?1:0)});
+    }));
+    const best=f=>opts.filter(f).sort((x,y)=>y.r-x.r||x.cost-y.cost)[0];
+    const play=x=>({type:'play',i:x.i,v:x.v}),STAND={type:'stand'},END={type:'end'};
+    if(t>20){const x=best(x=>x.r<=20&&(lvl>0||x.r>=12));return x?play(x):END}
+    if(oS){
+      if(t>ot)return STAND;
+      const x=best(x=>x.r>ot&&x.r<=20);if(x)return play(x);
+      if(t===ot){
+        if(this.tb[p]&&!this.tb[o])return STAND;
+        return t>=(lvl>=2?17:16)?STAND:END;
+      }
+      return END;
+    }
+    const standAt=lvl===0?15+(Math.random()*4|0):lvl===1?17:18;
+    const want=[20,19,18,18][lvl];
+    if(t>=want)return STAND;
+    const x=best(x=>x.r>=want&&x.r<=20);
+    // stronger bots hold cards early in the match instead of cashing them in on a 17
+    if(x&&!(lvl>=2&&t>=17&&x.r<20&&this.hands[p].length<=2))return play(x);
+    if(t>=standAt)return STAND;
+    if(lvl===0&&t<=12&&Math.random()<.15){const w=best(x=>x.r<=15&&x.v>0);if(w)return play(w)}
+    return END;
+  }
+}
+
+/* ===================================================================
+   CLIENT STATE + TRANSPORTS
+   =================================================================== */
+let MODE='',UID=null,CODE='',MY=-1,IS_HOST=false,MYNAME='',SEATS=[null,null];
+let S=null,PV={},M=null,LW=null;   // public state, my private data, host engine, local waiter
+const LocalIO={
+  publish(s,priv){if(M&&M.io!==LocalIO)return;S=JSON.parse(JSON.stringify(s));const me=priv.find(x=>x.i===0);PV=me?{hand:me.hand}:{};render()},
+  wait(i,ok){return new Promise(r=>{LW={ok,r}})}
+};
+const NetIO={
+  publish(s,priv){const upd={state:s};priv.forEach(x=>upd['private/'+x.uid]={hand:x.hand});return db.ref('rooms/'+CODE).update(upd)},
+  wait(i,ok){return waitAct(M.P[i].uid,ok)}
+};
+function waitAct(uid,ok){
+  return new Promise(res=>{
+    const r=db.ref(`rooms/${CODE}/act/${uid}`);
+    const h=s=>{const a=s.val();if(!a)return;
+      if(a.seq===M.seq&&ok(a)){r.off('value',h);r.remove();res(a)}else r.remove()};
+    r.on('value',h);
+  });
+}
+function act(o){
+  if(MODE==='local'){if(LW&&LW.ok(o)){const w=LW;LW=null;w.r(o)}return}
+  o.seq=S.seq;db.ref(`rooms/${CODE}/act/${UID}`).set(o).catch(e=>toast('Move failed: '+e.message));
+}
+
+const screen=id=>['menu','lobby','app'].forEach(x=>$(x).hidden=x!==id);
+const layer=id=>{document.querySelectorAll('.layer').forEach(l=>l.hidden=l.id!==id)};
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{layer('');refreshWallet()});
+
+/* ===================================================================
+   VS BOTS (local)
+   =================================================================== */
+function startBotMatch(bot){
+  LW=null;
+  if(PR.deck.length!==10){toast('Your side deck needs 10 cards');openDeck(()=>layer('botsL'));return}
+  MODE='local';MY=0;layer('');screen('app');resetAnim();
+  const players=[{name:myName()||'You',human:true,deck:PR.deck.slice()},{name:bot.name,human:false,bot,deck:bot.deck.slice()}];
+  M=new Match(players,LocalIO);
+  const m=M;m.run().catch(e=>{if(e.message!=='aborted')console.error(e)});
+}
+function renderBots(){
+  $('botDeck').innerHTML=PR.deck.map(id=>cardHTML(id)).join('')||'<span class="dim">Empty</span>';
+  $('botList').innerHTML=BOTS.map((b,i)=>{
+    const rw=[b.rw.std?`${b.rw.std} Cantina Pack`:'',b.rw.prem?`${b.rw.prem} Smuggler's Pack${b.rw.prem>1?'s':''}`:'',`${b.rw.cr} cr`].filter(Boolean).join(' + ');
+    return `<div class="bot" data-bot="${i}"><div class="av" style="background:${b.col}">${b.av}</div><div class="t"><b>${esc(b.name)}</b><div>${esc(b.title)}</div>
+      <span class="diff" style="background:${DIFF[b.lvl][1]}">${DIFF[b.lvl][0]}</span><div style="margin-top:3px">Win: ${rw}</div></div></div>`}).join('');
+}
+$('botList').onclick=e=>{const el=e.target.closest('[data-bot]');if(el)startBotMatch(BOTS[+el.dataset.bot])};
+$('bPlayBots').onclick=()=>{renderBots();layer('botsL')};
+$('botEdit').onclick=()=>openDeck(()=>{renderBots();layer('botsL')});
+
+/* ===================================================================
+   TABLE RENDERING
+   =================================================================== */
+let PREV=[[],[]],PREVSET=-1,PREVMID='';
+function resetAnim(){PREV=[[],[]];PREVSET=-1;PREVMID='';$('ov').style.display='none';OVK=''}
+function canPlayHand(){return S&&S.turn===MY&&S.phase==='act'&&!S.played&&decB(S.boards[MY]).length<9}
+function render(){
+  if(!S||S.status!=='playing'||!S.players)return;
+  if(MY<0){$('msg').innerHTML='<div>This table is full.</div>';return}
+  const me=MY,op=1-MY,P=S.players;
+  if(S.mid!==PREVMID||S.set!==PREVSET){PREV=[[],[]];PREVSET=S.set;PREVMID=S.mid}
+  const myTurn=S.turn===me&&S.phase==='act',over=S.phase==='over';
+  $('setNo').textContent='Set '+S.set;
+  [['me',me],['op',op]].forEach(([k,a])=>{
+    const b=decB(S.boards[a]),t=S.totals[a],prev=PREV[a];
+    $(k+'Nm').textContent=P[a].name+(k==='me'?' (you)':'');
+    const tot=$(k+'Tot');tot.textContent=t;tot.className='tot'+(t>20?' bust':t===20?' tw':'');
+    $(k+'L').innerHTML=[0,1,2].map(i=>`<i class="${S.sets[a]>i?'f':''}"></i>`).join('');
+    const active=S.turn===a&&(S.phase==='act'||S.phase==='ai'||S.phase==='beat');
+    $(k+'W').className='sideW'+(active?' on':'');
+    $(k+'St').textContent=S.stood[a]?'STANDING':active?(k==='me'?'YOUR TURN':'PLAYING…'):'';
+    $(k+'St').className='st'+(S.stood[a]?' stand':'');
+    let h='';
+    for(let i=0;i<9;i++){
+      const e=b[i];if(!e){h+='<div class="pc slot"></div>';continue}
+      const pe=prev[i],cls=!pe?'pop':pe.v!==e.v?'flash':'';
+      h+=boardHTML(e,cls);
+    }
+    $(k+'B').innerHTML=h;PREV[a]=b;
+  });
+  $('opHand').innerHTML=Array(S.hc[op]||0).fill(backHTML()).join('');
+  const hand=decL(PV.hand),can=canPlayHand();
+  $('hand').innerHTML=[0,1,2,3].map(i=>hand[i]?cardHTML(hand[i],can?'tap':'',`data-h="${i}"`):'<div class="pc slot"></div>').join('');
+  $('bEnd').disabled=$('bStand').disabled=!myTurn;
+  let inst='';
+  if(myTurn)inst=S.played?'End your turn, or Stand to lock in your total.':'Play a card from your hand, or End Turn / Stand.';
+  else if(S.phase==='ai'||S.phase==='act'||S.phase==='beat')inst=`${P[S.turn].name} is thinking…`;
+  $('msg').innerHTML=`<div>${esc(S.msg||'')}</div><div class="inst">${inst}</div>`;
+  if(!myTurn)closePick();
+  overlay();
+}
+let OVK='';
+function overlay(){
+  const ph=S.phase,P=S.players;
+  if(ph==='setover'){
+    const key=S.mid+'s'+S.set;if(key===OVK)return;OVK=key;
+    const w=S.sw,head=w<0?'Tied set':w===MY?'You win the set!':P[w].name+' wins the set';
+    $('ov').innerHTML=`<div class="panel"><h2>Set ${S.set}</h2><div class="big">${esc(head)}</div><div class="dim">${esc(S.result)}</div>
+      <div class="rw">Sets: ${esc(P[MY].name)} <b>${S.sets[MY]}</b> · ${esc(P[1-MY].name)} <b>${S.sets[1-MY]}</b></div></div>`;
+    $('ov').style.display='flex';return;
+  }
+  if(ph==='over'){
+    const key=S.mid+'over';if(key===OVK)return;OVK=key;
+    const won=S.winner===MY,rw=claimReward();
+    const btns=MODE==='local'
+      ?`<button id="ovAgain">Rematch</button><button class="alt" id="ovMenu">Back to the cantina</button>`
+      :IS_HOST?`<button id="ovLobby">Back to lobby</button>`:`<div class="dim" style="margin-top:10px">Waiting for the host…</div>`;
+    $('ov').innerHTML=`<div class="panel"><h2>${won?'Victory':'Defeat'}</h2><div class="big">${esc(P[S.winner].name)} wins the match ${S.sets[S.winner]}–${S.sets[1-S.winner]}</div>
+      <div class="dim">${esc(S.result)}</div><div class="rw">${rw}</div>${btns}</div>`;
+    $('ov').style.display='flex';return;
+  }
+  OVK='';$('ov').style.display='none';
+}
+$('ov').onclick=e=>{
+  const id=e.target.id;
+  if(id==='ovAgain'){const bot=M.P[1].bot;M.dead=true;startBotMatch(bot)}
+  else if(id==='ovMenu'){quitLocal();renderBots();layer('botsL')}
+  else if(id==='ovLobby'&&IS_HOST){M=null;pubLobby()}
+};
+// Rewards are claimed once per match, on each player's own device
+function claimReward(){
+  if(!PR.claimed.includes(S.mid)){
+    const won=S.winner===MY,opp=S.players[1-MY];
+    const bot=BOTS.find(b=>b.id===S.bot)||BOTS[1];
+    const rw=opp.human?(won?HUMAN_WIN:HUMAN_LOSS):(won?bot.rw:BOT_LOSS);
+    PR.credits+=rw.cr||0;PR.packs.std+=rw.std||0;PR.packs.prem+=rw.prem||0;
+    if(won)PR.w=(PR.w||0)+1;else PR.l=(PR.l||0)+1;
+    PR.claimed.push(S.mid);PR.claimed=PR.claimed.slice(-40);PR.lastRw={mid:S.mid,rw,won};saveProfile();refreshWallet();
+  }
+  const r=PR.lastRw&&PR.lastRw.mid===S.mid?PR.lastRw.rw:{};
+  const parts=[r.std?`📦 ${r.std} Cantina Pack`:'',r.prem?`⭐ ${r.prem} Smuggler's Pack${r.prem>1?'s':''}`:'',r.cr?`◈ ${r.cr} credits`:''].filter(Boolean);
+  return parts.length?`<b>Rewards</b><br>${parts.join('<br>')}${r.std||r.prem?'<br><span class="dim">Open them from the Packs menu.</span>':''}`:'';
+}
+
+/* ---------- hand card picker ---------- */
+function closePick(){$('pick').style.display='none'}
+$('hand').onclick=e=>{
+  const el=e.target.closest('[data-h]');if(!el||!canPlayHand())return;
+  const i=+el.dataset.h,id=decL(PV.hand)[i],k=CAT[id],b=decB(S.boards[MY]);
+  const opts=choices(id).map(v=>{const nb=b.map(x=>({...x}));applyPlay(nb,id,v);
+    const r=total(nb),lab=k.t==='f'||k.t==='d'?'Play it':'Play as '+sgn(v);
+    return `<button data-v="${v}" class="${v<0?'alt':''}">${lab} → total ${r}${r>20?' (bust!)':r===20?' ✓':''}</button>`}).join('');
+  $('pick').innerHTML=`<div class="panel"><div style="display:flex;justify-content:center">${cardHTML(id,'r'+k.r)}</div><h2 style="margin-top:8px">${esc(k.name)}</h2><div class="dim">${esc(k.desc)}</div>
+    <div class="pickopts">${opts}<button class="alt" data-v="x">Cancel</button></div></div>`;
+  $('pick').style.display='flex';$('pick').dataset.i=i;
+};
+$('pick').onclick=e=>{
+  const bt=e.target.closest('[data-v]');if(!bt&&e.target.id!=='pick')return;
+  closePick();if(!bt||bt.dataset.v==='x')return;
+  act({type:'play',i:+$('pick').dataset.i,v:+bt.dataset.v});
+};
+$('bEnd').onclick=()=>{if(S&&S.turn===MY&&S.phase==='act')act({type:'end'})};
+$('bStand').onclick=()=>{if(S&&S.turn===MY&&S.phase==='act')act({type:'stand'})};
+function quitLocal(){if(M)M.dead=true;M=null;LW=null;S=null;MODE='';closePick();$('ov').style.display='none';screen('menu');refreshWallet()}
+$('bQuit').onclick=()=>{
+  if(MODE==='local'){
+    if(S&&S.phase!=='over'&&!confirm('Forfeit this match? You won\'t get any rewards.'))return;
+    quitLocal();
+  }else if(confirm('Leave this online game?'))location.href=location.pathname;
+};
+
+/* ===================================================================
+   SIDE DECK BUILDER
+   =================================================================== */
+let deckBack=null,INFO='';
+function openDeck(back){deckBack=back;INFO='';renderDeck();layer('deckL')}
+function renderDeck(){
+  const cnt={};PR.deck.forEach(id=>cnt[id]=(cnt[id]||0)+1);
+  $('dCount').textContent=`(${PR.deck.length}/10)`;
+  $('dSlots').innerHTML=[...Array(10)].map((_,i)=>PR.deck[i]?cardHTML(PR.deck[i],'r'+CAT[PR.deck[i]].r,`data-rm="${i}"`):'<div class="pc slot"></div>').join('');
+  $('dColl').innerHTML=IDS.map(id=>{const o=owned(id),k=CAT[id];
+    return `<div class="gc" data-add="${id}">${cardHTML(id,(o?'r'+k.r:'lock'))}<b>${esc(k.name)}</b><span>${o?`${cnt[id]||0} in deck · ${o}/3`:'not owned'}</span></div>`}).join('');
+  $('cardInfo').innerHTML=INFO;
+  $('deckDone').textContent=PR.deck.length===10?'Done':'Done ('+PR.deck.length+'/10)';
+}
+$('dColl').onclick=e=>{
+  const el=e.target.closest('[data-add]');if(!el)return;const id=el.dataset.add,k=CAT[id];
+  INFO=`<b style="color:${RCOL[k.r]}">${esc(k.name)}</b> · ${RNAME[k.r]} — ${esc(k.desc)}`;
+  const inDeck=PR.deck.filter(x=>x===id).length;
+  if(!owned(id))INFO+='<br><span class="dim">Earn it from packs or buy it from Grelko.</span>';
+  else if(inDeck>=owned(id))INFO+=`<br><span class="dim">You only own ${owned(id)}.</span>`;
+  else if(PR.deck.length>=10)INFO+='<br><span class="dim">Deck is full. Tap a deck card to remove it.</span>';
+  else{PR.deck.push(id);PR.deck.sort((a,b)=>ORD(a)-ORD(b));saveProfile()}
+  renderDeck();
+};
+$('dSlots').onclick=e=>{const el=e.target.closest('[data-rm]');if(!el)return;PR.deck.splice(+el.dataset.rm,1);saveProfile();renderDeck()};
+$('dClear').onclick=()=>{PR.deck=[];saveProfile();renderDeck()};
+$('dAuto').onclick=()=>{
+  // specials first (rarest first), then a balanced mix of + and − cards, favouring 2–4
+  const pool=[];IDS.forEach(id=>{for(let i=0;i<owned(id);i++)pool.push(id)});
+  const out=[],take=id=>{const i=pool.indexOf(id);if(i<0||out.length>=10)return false;pool.splice(i,1);out.push(id);return true};
+  pool.filter(id=>CAT[id].t!=='p'&&CAT[id].t!=='m').sort((a,b)=>RRANK[CAT[b].r]-RRANK[CAT[a].r]||ORD(a)-ORD(b)).slice(0,6).forEach(take);
+  const pref=[3,4,2,5,1,6];
+  for(let pass=0;pass<3&&out.length<10;pass++)for(const n of pref){take('M'+n);take('P'+n)}
+  pool.slice().forEach(take);
+  PR.deck=out.sort((a,b)=>ORD(a)-ORD(b));saveProfile();renderDeck();
+};
+$('deckDone').onclick=()=>{if(PR.deck.length!==10)return toast('Pick exactly 10 cards');layer('');refreshWallet();if(deckBack)deckBack()};
+$('bDeck').onclick=()=>openDeck(null);
+
+/* ===================================================================
+   PACKS
+   =================================================================== */
+let REV=[];
+function renderPacks(){
+  refreshWallet();
+  $('nStd').textContent=`You have ${PR.packs.std}`;$('nPrem').textContent=`You have ${PR.packs.prem}`;
+  $('openStd').disabled=!PR.packs.std||REV.some(r=>!r.shown);$('openPrem').disabled=!PR.packs.prem||REV.some(r=>!r.shown);
+  $('reveal').innerHTML=REV.map((r,i)=>r.shown
+    ?`<div class="rv">${cardHTML(r.id,'flipIn r'+CAT[r.id].r)}<b style="color:${RCOL[CAT[r.id].r]}">${RNAME[CAT[r.id].r]}</b>${r.cr?`<span class="dup">+${r.cr} cr</span>`:r.isNew?'<span class="new">NEW!</span>':`<span>${owned(r.id)}/3</span>`}</div>`
+    :`<div class="rv" data-rv="${i}">${backHTML()}<span class="dim">tap</span></div>`).join('');
+  $('revBtns').innerHTML=REV.some(r=>!r.shown)?'<button id="revAll">Reveal all</button>':'';
+}
+function openPack(kind){
+  if(!PR.packs[kind]||REV.some(r=>!r.shown))return;
+  PR.packs[kind]--;
+  REV=rollPack(kind).map(id=>({...grantCard(id),shown:false}));
+  saveProfile();renderPacks();
+}
+$('openStd').onclick=()=>openPack('std');$('openPrem').onclick=()=>openPack('prem');
+$('reveal').onclick=e=>{const el=e.target.closest('[data-rv]');if(!el)return;REV[+el.dataset.rv].shown=true;renderPacks()};
+$('revBtns').onclick=e=>{if(e.target.id==='revAll'){REV.forEach(r=>r.shown=true);renderPacks()}};
+$('bPacks').onclick=()=>{REV=[];renderPacks();layer('packsL')};
+
+/* ===================================================================
+   GRELKO'S DEN (shop)
+   =================================================================== */
+const HUTT={
+  hi:["Ho ho ho! Another little gambler slithers into Grelko's den. You have credits, yes?",
+      "These cards fell off a Republic cruiser. Very legal. Mostly.",
+      "Credits first, questions never. That is the Grelko way.",
+      "You want an edge, eh? Grelko sells edges. Sharp ones.",
+      "Do not touch the merchandise unless you are buying, worm."],
+  buy:["Hoo hoo! A fine choice. Grelko never cheats... his customers.","Pleasure doing business. Tell no one where you got it.",
+       "Ahh, the sweet music of credits. Come again, little one.","Use it well. And if anyone asks, you won it fair."],
+  poor:["Bah! You smell of empty pockets. Come back with more credits.","Grelko does not do charity. Go win some games, then talk."],
+  max:["You already carry three of those. Greedy! Grelko likes that, but no."]
+};
+const say=k=>$('huttSay').textContent=HUTT[k][Math.random()*HUTT[k].length|0];
+const SHOP=IDS.filter(id=>CAT[id].r!=='C').sort((a,b)=>RRANK[CAT[b].r]-RRANK[CAT[a].r]||ORD(a)-ORD(b));
+function dealId(){const d=Math.floor(Date.now()/864e5);return SHOP.filter(id=>CAT[id].r!=='U')[d%SHOP.filter(id=>CAT[id].r!=='U').length]}
+function priceOf(id){const p=PRICE[CAT[id].r];return id===dealId()?Math.round(p*.7/10)*10:p}
+function renderShop(){
+  refreshWallet();const deal=dealId();
+  $('shopList').innerHTML=SHOP.map(id=>{const k=CAT[id],p=priceOf(id),o=owned(id);
+    return `<div class="item ${id===deal?'deal':''}">${cardHTML(id,'r'+k.r)}<div class="t"><b>${esc(k.name)}</b>
+      <span class="tag" style="background:${RCOL[k.r]};color:#111">${RNAME[k.r].toUpperCase()}</span>${id===deal?'<span class="tag" style="background:var(--red);color:#fff">DEAL OF THE DAY −30%</span>':''}
+      <div>${esc(k.desc)}</div><div>You own ${o}/3</div></div>
+      <button data-buy="${id}" ${o>=3?'disabled':''}>${o>=3?'Maxed':'◈ '+p}</button></div>`}).join('');
+}
+$('shopList').onclick=e=>{
+  const b=e.target.closest('[data-buy]');if(!b)return;const id=b.dataset.buy,p=priceOf(id);
+  if(owned(id)>=3)return say('max');
+  if(PR.credits<p)return say('poor');
+  PR.credits-=p;grantCard(id);saveProfile();say('buy');renderShop();toast(`Bought ${CAT[id].name}`);
+};
+$('bShop').onclick=()=>{say('hi');renderShop();layer('shopL')};
+$('bRules').onclick=()=>layer('rulesL');
+
+/* ===================================================================
+   ONLINE: lobby, seats, decks (same flow as Golf)
+   =================================================================== */
+const myName=()=>$('name').value.trim().slice(0,12);
+$('name').oninput=()=>{try{localStorage.setItem('pazaakName',myName())}catch(e){}};
+const err=m=>$('err').textContent=m;
+const LET='ABCDEFGHJKLMNPQRSTUVWXYZ';
+let DECKS={},HOST_DECK=null,DW={},MY_READY=false;
+
+if(auth){
+  auth.onAuthStateChanged(u=>{if(u){UID=u.uid;$('create').disabled=$('join').disabled=false;$('conn').textContent=''}});
+  auth.signInAnonymously().catch(e=>{$('conn').textContent='Online play unavailable: '+e.message});
+}else $('conn').textContent='Online play unavailable (offline). Bots still work!';
+
+function needName(){const n=myName();if(!n)err('Enter your name first');return n}
+async function createGame(){
+  const name=needName();if(!name)return;
+  if(PR.deck.length!==10)return err('Build a 10-card side deck first');
+  let code;
+  do{code=[...Array(4)].map(()=>LET[Math.random()*LET.length|0]).join('')}
+  while((await db.ref(`rooms/${code}/host`).once('value')).exists());
+  await db.ref(`rooms/${code}/host`).set(UID);
+  await db.ref(`rooms/${code}`).update({state:{status:'lobby',game:'pazaak',ready:[false,false]},'seats/0':{uid:UID,name}});
+  enter(code,name);
+}
+async function joinGame(){
+  const name=needName();if(!name)return;
+  const code=$('code').value.trim().toUpperCase();
+  if(code.length!==4)return err('Enter the 4-letter room code');
+  if(!(await isPazaakRoom(code)))return err('No Pazaak game with that code');
+  const v=(await db.ref(`rooms/${code}/seats`).once('value')).val()||{};
+  if(![0,1].some(i=>v[i]&&v[i].uid===UID)){
+    const res=await db.ref(`rooms/${code}/seats/1`).transaction(cur=>cur?undefined:{uid:UID,name});
+    if(!res.committed)return err('That table is full');
+  }
+  enter(code,name);
+}
+async function isPazaakRoom(code){
+  if(!(await db.ref(`rooms/${code}/host`).once('value')).exists())return false;
+  const st=(await db.ref(`rooms/${code}/state`).once('value')).val();
+  return !!st&&st.game==='pazaak';
+}
+async function enter(code,name){
+  CODE=code;MYNAME=name;MODE='net';err('');MY_READY=false;
+  const R='rooms/'+code;
+  IS_HOST=(await db.ref(R+'/host').once('value')).val()===UID;
+  screen('lobby');lobbyUI();
+  db.ref(R+'/seats').on('value',s=>{
+    const v=s.val()||{};SEATS=[v[0]||null,v[1]||null];
+    MY=SEATS.findIndex(x=>x&&x.uid===UID);
+    if(IS_HOST){hostWatchDecks();pubLobby()}
+    lobbyUI();render();
+  });
+  db.ref(R+'/state').on('value',s=>{
+    S=s.val()||{status:'lobby'};
+    if(S.status==='playing'){
+      if(IS_HOST&&!M){S=null;return pubLobby()}   // host reloaded mid-match: back to the lobby
+      if($('app').hidden){layer('');resetAnim();screen('app')}
+      render();
+    }else{
+      screen('lobby');lobbyUI();OVK='';$('ov').style.display='none';closePick();
+    }
+  });
+  db.ref(R+'/private/'+UID).on('value',s=>{PV=s.val()||{};render()});
+}
+// Host listens for each guest's side-deck submission (sent through their act/ slot)
+function hostWatchDecks(){
+  SEATS.forEach(s=>{
+    if(!s||s.uid===UID||DW[s.uid])return;
+    const r=db.ref(`rooms/${CODE}/act/${s.uid}`);
+    const h=x=>{const a=x.val();if(M||!a||a.type!=='deck')return;
+      const d=decL(a.deck);if(validDeck(d)){DECKS[s.uid]=d;pubLobby()}};
+    r.on('value',h);DW[s.uid]=1;
+  });
+}
+function validDeck(d){if(d.length!==10||!d.every(id=>CAT[id]))return false;const c={};return d.every(id=>(c[id]=(c[id]||0)+1)<=3)}
+function seatReady(i){const s=SEATS[i];if(!s)return false;return s.uid===UID?!!HOST_DECK:!!DECKS[s.uid]}
+function pubLobby(){
+  if(!IS_HOST||M)return;
+  db.ref(`rooms/${CODE}/state`).set({status:'lobby',game:'pazaak',ready:[seatReady(0),seatReady(1)]});
+}
+function lobbyUI(){
+  if(!CODE||MODE!=='net')return;
+  if(S&&S.status==='playing')return;
+  $('rc').textContent=CODE;
+  const rd=(S&&S.ready)||[false,false];
+  $('seats').innerHTML=SEATS.map((s,i)=>`<div class="row"><span>Seat ${i+1}</span>${
+    s?`<span>${esc(s.name)}${s.uid===UID?' (you)':''} ${rd[i]?'<span class="ok">✓ Ready</span>':'<span class="dim">picking cards…</span>'}</span>`:
+    MY===-1?`<button data-sit="${i}">Sit here</button>`:'<span class="dim">Empty: Grik (computer) plays</span>'}</div>`).join('');
+  $('lobDeck').innerHTML=PR.deck.map(id=>cardHTML(id)).join('')||'<span class="dim">Empty</span>';
+  const iAmReady=MY>=0&&rd[MY];
+  $('lobReady').textContent=iAmReady?'✓ Ready':'Ready';
+  $('lobReady').disabled=MY<0;
+  $('start').hidden=!IS_HOST;
+  const humans=SEATS.filter(Boolean).length,allReady=SEATS.every((s,i)=>!s||rd[i]);
+  $('start').disabled=!allReady;
+  $('lmsg').textContent=IS_HOST
+    ?(allReady?(humans<2?'Start now to play the computer, or wait for a friend.':'Both players ready!'):'Waiting for everyone to pick their side deck and tap Ready…')
+    :(iAmReady?'Waiting for the host to start the match…':'Pick your side deck, then tap Ready.');
+}
+$('seats').onclick=e=>{const b=e.target.closest('[data-sit]');if(!b)return;
+  db.ref(`rooms/${CODE}/seats/${+b.dataset.sit}`).transaction(cur=>cur?undefined:{uid:UID,name:MYNAME})};
+$('lobEdit').onclick=()=>openDeck(()=>{if(MY>=0&&S&&S.ready&&S.ready[MY])sendDeck();lobbyUI()});
+function sendDeck(){
+  if(PR.deck.length!==10)return toast('Your side deck needs 10 cards');
+  if(IS_HOST){HOST_DECK=PR.deck.slice();pubLobby()}
+  else db.ref(`rooms/${CODE}/act/${UID}`).set({type:'deck',deck:encL(PR.deck)});
+  toast('Side deck locked in');
+}
+$('lobReady').onclick=sendDeck;
+$('create').onclick=createGame;
+$('join').onclick=joinGame;
+$('lobLeave').onclick=()=>{location.href=location.pathname};
+$('start').onclick=()=>{
+  if(M||!IS_HOST)return;
+  const rd=(S&&S.ready)||[];if(!SEATS.every((s,i)=>!s||rd[i]))return;
+  const bot=BOTS[1];
+  const players=SEATS.map(s=>s?{uid:s.uid,name:s.name,human:true,deck:s.uid===UID?HOST_DECK:DECKS[s.uid]}
+                               :{name:bot.name+' (CPU)',human:false,bot,deck:bot.deck.slice()});
+  SEATS.forEach(s=>{if(s&&s.uid!==UID)db.ref(`rooms/${CODE}/act/${s.uid}`).remove()});
+  M=new Match(players,NetIO);
+  M.run().catch(e=>{console.error(e);toast('Match stopped: '+e.message)});
+};
+
+/* ---------- invite links ---------- */
+const linkFor=c=>`${location.origin}${location.pathname}?join=${c}`;
+$('invite').onclick=()=>{$('invLink').textContent=linkFor(CODE);$('invHostBack').classList.add('show')};
+$('invClose').onclick=()=>$('invHostBack').classList.remove('show');
+$('invCopy').onclick=async()=>{
+  try{await navigator.clipboard.writeText(linkFor(CODE));toast('Link copied')}
+  catch(e){const r=document.createRange();r.selectNodeContents($('invLink'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Press and hold the link to copy')}
+};
+$('invText').onclick=()=>{
+  const body=`Pazaak? Bring your best side deck. Tap to join: ${linkFor(CODE)}`;
+  const ua=navigator.userAgent||'',isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  location.href=`sms:${isIOS?'&':'?'}body=${encodeURIComponent(body)}`;
+};
+let JOINCODE='';
+async function checkJoinLink(){
+  const c=new URLSearchParams(location.search).get('join');
+  if(!c||!auth)return;
+  JOINCODE=c.toUpperCase().trim();
+  $('invJoinCode').textContent=JOINCODE;
+  $('invName').value=myName();
+  const go=()=>$('invGo').disabled=!$('invName').value.trim();
+  $('invName').oninput=go;go();
+  $('invJoinBack').classList.add('show');
+  await new Promise(res=>{const un=auth.onAuthStateChanged(u=>{if(u){un();res()}})});
+  if(!(await isPazaakRoom(JOINCODE))){$('invMsg').textContent='That game no longer exists.';$('invGo').disabled=true;return}
+  if($('invName').value.trim())joinLink();
+}
+async function joinLink(){
+  const name=$('invName').value.trim().slice(0,12);if(!name)return;
+  $('name').value=name;try{localStorage.setItem('pazaakName',name)}catch(e){}
+  $('invGo').disabled=true;$('invMsg').textContent='Joining…';
+  try{
+    const v=(await db.ref(`rooms/${JOINCODE}/seats`).once('value')).val()||{};
+    if(![0,1].some(i=>v[i]&&v[i].uid===UID)){
+      const st=(await db.ref(`rooms/${JOINCODE}/state/status`).once('value')).val();
+      if(st==='playing'){$('invMsg').textContent='This match has already started.';return}
+      const res=await db.ref(`rooms/${JOINCODE}/seats/1`).transaction(cur=>cur?undefined:{uid:UID,name});
+      if(!res.committed){$('invMsg').textContent='This table is full.';return}
+    }
+    $('invJoinBack').classList.remove('show');history.replaceState(null,'',location.pathname);
+    enter(JOINCODE,name);
+  }catch(e){$('invMsg').textContent='Join failed: '+(e.message||e)}
+  finally{$('invGo').disabled=!$('invName').value.trim()}
+}
+$('invGo').onclick=joinLink;
+$('invCancel').onclick=()=>{$('invJoinBack').classList.remove('show');history.replaceState(null,'',location.pathname)};
+
+/* ---------- boot ---------- */
+loadProfile();saveProfile();
+try{$('name').value=localStorage.getItem('pazaakName')||''}catch(e){}
+refreshWallet();
+checkJoinLink();
+</script>
+</body>
+</html>
